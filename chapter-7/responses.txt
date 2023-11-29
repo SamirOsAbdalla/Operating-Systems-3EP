@@ -1,0 +1,107 @@
+1. Compute the response time and turnaround time when running
+three jobs of length 200 with the SJF and FIFO schedulers.
+
+FIFO:
+
+Here is the job list, with the run time of each job:
+    Job 0 ( length = 200 )
+    Job 1 ( length = 200 )
+    Job 2 ( length = 200 )
+
+    Job 0 Turnaround: 200           Job 0 Response: 0
+    Job 1 Turnaround: 400           Job 1 Response: 200
+    Job 2 Turnaround: 600           Job 2 Response: 400
+    Turnaround: 1200 / 3 = 400      Response: 600 / 3 = 200
+
+SJF:
+
+The same as above since they all length(job0) < length(job1) < length(job2)
+and thus they will be processed in that order(which is the same as above)
+
+
+
+2. Now do the same but with jobs of different lengths: 100, 200, and
+300.
+
+Here is the job list, with the run time of each job:
+    Job 0 ( length = 100.0 )
+    Job 1 ( length = 200.0 )
+    Job 2 ( length = 300.0 )
+
+    Job 0 Turnaround: 100           Job 0 Response: 0
+    Job 1 Turnaround: 300           Job 1 Response: 100
+    Job 2 Turnaround: 600           Job 2 Response: 300
+    Turnaround: 1000 / 3 = 333.3    Response: 400 / 3 = 133.3
+
+SJF:
+
+Same as above
+
+
+
+3. Now do the same, but also with the RR scheduler and a time-slice
+of 1.
+
+Here is the job list, with the run time of each job:
+    Job 0 ( length = 200.0 )
+    Job 1 ( length = 200.0 )
+    Job 2 ( length = 200.0 )
+
+    Since its round robin with ts of 1 each process will switch after 1 second
+
+    Job 0 Turnaround: 598           Job 0 Response: 0
+    Job 1 Turnaround: 599           Job 1 Response: 1
+    Job 2 Turnaround: 600           Job 2 Response: 2
+    Turnaround: 1797 / 3 = 599      Response: 3 / 3 = 1
+
+4. For what types of workloads does SJF deliver the same turnaround
+times as FIFO?
+
+When the jobs arrive in order of shortest length in both types of policies
+
+
+
+5. For what types of workloads and quantum lengths does SJF deliver
+the same response times as RR?
+
+If the length of each job was less than or equal to the dictated time slice for the RR policy
+
+
+
+6. What happens to response time with SJF as job lengths increase?
+Can you use the simulator to demonstrate the trend?
+
+As the job lengths increase, so will the response time since each job will be scheduled later relative
+to its initial arrival time.
+
+    Job 0 ( length = 100.0 )
+    Job 1 ( length = 200.0 )
+    Job 2 ( length = 300.0 )
+
+    Job 0 Response: 0
+    Job 1 Response: 100
+    Job 2 Response: 300
+    Response: 400 / 3 = 133.3
+
+
+    Job 0 ( length = 200.0 )
+    Job 1 ( length = 300.0 )
+    Job 2 ( length = 400.0 )
+
+    Job 0 Response: 0
+    Job 1 Response: 200
+    Job 2 Response: 500
+    Response: 700 / 3 = 233.3
+
+
+
+7. What happens to response time with RR as quantum lengths increase? Can you write an 
+equation that gives the worst-case response time, given N jobs?
+
+As quantum lengths increase, so will the response times since each job will run longer since its time
+slice increased leading to longer response times.
+
+The worst-case response time is when each job uses its full time slice which means that the worst-case
+response time for a job i where i <= N is (1 + ... + i-1) * TS where TS is the length of the time-slice.
+
+
