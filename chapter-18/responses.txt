@@ -1,0 +1,141 @@
+0. (README problem)
+
+Clearly, virtual page numbers 1 and 2 are not mapped to any physical page numbers due to
+their valid bits being set to 0
+
+Since our page size is 4k(4096 bytes) the offset into the page is 12 bits (2 ^ 12 = 4096).
+Since our address space is 16k bytes, that means we need 14 bits to represent the entire address
+space which means that 2 bits (14 - 12) are needed to represent the total number of virtual page
+numbers.
+
+The output from running the initial command is:
+
+Page Table (from entry 0 down to the max size)
+   0x8000000c
+   0x00000000
+   0x00000000
+   0x80000006
+
+Virtual Address Trace
+  VA  0: 0x00003229 (decimal:    12841) --> PA or invalid?
+  VA  1: 0x00001369 (decimal:     4969) --> PA or invalid?
+  VA  2: 0x00001e80 (decimal:     7808) --> PA or invalid?
+  VA  3: 0x00002556 (decimal:     9558) --> PA or invalid?
+  VA  4: 0x00003a1e (decimal:    14878) --> PA or invalid?
+
+*********   SECOND VIRTUAL ADDRESS: 0x00001369 ***********
+            In Binary:  01 0011 0110 1001
+
+            The virtual page number is 1
+            The offset is 873
+            As stated before, virtual page number 1 is invalid so that is an invalid address
+
+*********   THIRD VIRTUAL ADDRESS: 0x00001e80 *********
+            In Binary: 01 1110 0100 0000
+
+            The virtual page number is 1 which is does not have a valid PFN
+
+*********   FOURTH VIRTUAL ADDRESS: 0x00002556 *********
+            In Binary: 10 0101 0101 0110
+
+            The virtual page number is 2 which does not have a valid PFN
+
+*********   FIFTH VIRTUAL ADDRESS: 0x00003a1e *********
+            In Binary: 11 1010 0001 1110
+
+            The virtual page number is 3
+            The offset is 2590
+
+            Using the page table, virtual page number 3 maps to PFN 0x6
+
+            Since each page is 4k, then PFN 0x6 is at address 0x6000 in hexadecimal.
+            2590 in hexadecimal is 0x0a1e
+
+            After ORing the two together the final address is 0x6a1e
+
+1. Before doing any translations, let’s use the simulator to study how
+linear page tables change size given different parameters. Compute
+the size of linear page tables as different parameters change. Some
+suggested inputs are below; by using the -v flag, you can see
+how many page-table entries are filled.
+
+First, to understand how linear page table size changes as the address space grows:
+
+paging-linear-translate.py -P 1k -a 1m -p 512m -v -n 0
+paging-linear-translate.py -P 1k -a 2m -p 512m -v -n 0
+paging-linear-translate.py -P 1k -a 4m -p 512m -v -n 0
+
+
+Then, to understand how linear page table size changes as page size
+grows:
+
+paging-linear-translate.py -P 1k -a 1m -p 512m -v -n 0
+paging-linear-translate.py -P 2k -a 1m -p 512m -v -n 0
+paging-linear-translate.py -P 4k -a 1m -p 512m -v -n 0
+
+Before running any of these, try to think about the expected trends.
+
+How should page-table size change as the address space grows? 
+As the page size grows? 
+Why shouldn’t we just use really big pages in general?
+
+
+******* RESPONSE *******
+
+As address space grows, so does the number of entries in the page table. This is a result
+of having more possible mappings from a virtual page to a physical page.
+
+As page size grows, the page table size actually decreases. This makes sense because we have
+less actual pages and larger offsets into those pages.
+
+Pages shouldn't be really big since the whole point of paging is to reduce fragmentation and
+reduce the amount of wasted memory allocated to a given process.
+
+
+2. Now let’s do some translations. Start with some small examples,
+and change the number of pages that are allocated to the address
+space with the -u flag. For example:
+
+paging-linear-translate.py -P 1k -a 16k -p 32k -v -u 0
+paging-linear-translate.py -P 1k -a 16k -p 32k -v -u 25
+paging-linear-translate.py -P 1k -a 16k -p 32k -v -u 50
+paging-linear-translate.py -P 1k -a 16k -p 32k -v -u 75
+paging-linear-translate.py -P 1k -a 16k -p 32k -v -u 100
+
+What happens as you increase the percentage of pages that are allocated in each address space?
+
+
+******* RESPONSE *******
+
+It seems that by increasing the number of pages allocated to the address space, the number
+of valid virtual page number to PFN mappings increase in the page table. This makes sense
+because if an address space has more pages, this will necessitate more mappings in the page
+table.
+
+
+3. Now let’s try some different random seeds, and some different (and
+sometimes quite crazy) address-space parameters, for variety:
+
+paging-linear-translate.py -P 8 -a 32 -p 1024 -v -s 1
+paging-linear-translate.py -P 8k -a 32k -p 1m -v -s 2
+paging-linear-translate.py -P 1m -a 256m -p 512m -v -s 3
+
+Which of these parameter combinations are unrealistic? Why?
+
+
+******* RESPONSE *******
+
+Of course the first one is the most unrealistic because there are no page sizes or memory
+sizes (at least to my knowledge) that are that small.
+
+
+4. 4. Use the program to try out some other problems. Can you find the
+limits of where the program doesn’t work anymore? For example,
+what happens if the address-space size is bigger than physical memory?
+
+
+******* RESPONSE *******
+
+If address-space size is bigger than physical memory the program stops working. This is
+because we no longer have enough space to hold each possible address leading to physical
+addresses that have no place in memory.
